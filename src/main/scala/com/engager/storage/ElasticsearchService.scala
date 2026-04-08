@@ -45,10 +45,21 @@ class ElasticsearchService(
     log.debug(s"Indexed event ${event.eventId}")
   }.recover { case ex => log.error(s"Failed to index event ${event.eventId}", ex) }
 
-  def searchEvents(userId: String, limit: Int = 50, offset: Int = 0): Future[List[UserEvent]] =
+  def searchEvents(
+    userId: String,
+    limit: Int = 50,
+    offset: Int = 0,
+    eventType: Option[String]
+  ): Future[List[UserEvent]] =
     Future {
+      val queryClause = eventType match {
+        case Some(et) =>
+          s"""{"bool":{"must":[{"term":{"userId":"$userId"}},{"term":{"eventType":"$et"}}]}}"""
+        case None =>
+          s"""{"term":{"userId":"$userId"}}"""
+      }
       val query =
-        s"""{"query":{"term":{"userId":"$userId"}},"sort":[{"timestamp":{"order":"desc"}}],"from":$offset,"size":$limit}"""
+        s"""{"query":$queryClause,"sort":[{"timestamp":{"order":"desc"}}],"from":$offset,"size":$limit}"""
       val searchReq = new SearchRequest.Builder()
         .index(AppConfig.Elasticsearch.eventsIndex)
         .withJson(new StringReader(query))
@@ -165,4 +176,5 @@ class ElasticsearchService(
     transport.close()
     restClient.close()
   }
+
 }
