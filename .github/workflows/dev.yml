@@ -1,0 +1,26 @@
+name: Development integration
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: sbt
+
+      - name: Lint (scalafmt) — warning only
+        run: sbt scalafmtCheckAll || true
+
+      - name: Run unit tests
+        run: sbt test

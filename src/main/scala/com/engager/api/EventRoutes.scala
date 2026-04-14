@@ -60,24 +60,27 @@ class EventRoutes(producer: EventProducer, esService: ElasticsearchService)(impl
       // GET /api/v1/events/:userId
       path(Segment) { userId =>
         get {
-          parameters("limit".as[Int].withDefault(50), "offset".as[Int].withDefault(0)) {
-            (limit, offset) =>
-              val result = for {
-                events <- esService.searchEvents(userId, limit, offset)
-                total  <- esService.countEvents(userId)
-              } yield (events, total)
-              onSuccess(result) { case (events, total) =>
-                complete(
-                  StatusCodes.OK -> ApiResponse.ok(
-                    Json.obj(
-                      "total"  -> total.asJson,
-                      "limit"  -> limit.asJson,
-                      "offset" -> offset.asJson,
-                      "events" -> events.asJson
-                    )
+          parameters(
+            "limit".as[Int].withDefault(50),
+            "offset".as[Int].withDefault(0),
+            "eventType".as[String].?
+          ) { (limit, offset, eventType) =>
+            val result = for {
+              events <- esService.searchEvents(userId, limit, offset, eventType)
+              total  <- esService.countEvents(userId)
+            } yield (events, total)
+            onSuccess(result) { case (events, total) =>
+              complete(
+                StatusCodes.OK -> ApiResponse.ok(
+                  Json.obj(
+                    "total"  -> total.asJson,
+                    "limit"  -> limit.asJson,
+                    "offset" -> offset.asJson,
+                    "events" -> events.asJson
                   )
                 )
-              }
+              )
+            }
           }
         }
       }
