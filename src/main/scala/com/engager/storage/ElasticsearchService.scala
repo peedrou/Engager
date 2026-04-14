@@ -49,7 +49,7 @@ class ElasticsearchService(
     userId: String,
     limit: Int = 50,
     offset: Int = 0,
-    eventType: Option[String]
+    eventType: Option[String] = None
   ): Future[List[UserEvent]] =
     Future {
       val queryClause = eventType match {

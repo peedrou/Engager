@@ -1,4 +1,4 @@
-package com.engager
+package com.engager.integration
 
 import com.dimafeng.testcontainers.ElasticsearchContainer
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
