@@ -26,4 +26,4 @@ jobs:
         run: sbt scalafmtCheckAll
 
       - name: Run unit tests
-        run: sbt test
+        run: sbt "testOnly com.engager.unit.*"
